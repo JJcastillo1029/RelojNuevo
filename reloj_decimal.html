@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reloj de Tiempo Decimal con Horario Ajustado</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    h1, h2 {
+      margin: 10px;
+    }
+    #clock {
+      font-size: 2em;
+      background: #fff;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .schedule {
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+      text-align: center;
+    }
+    #alarmMessage {
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: red;
+      display: none;
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Reloj de Tiempo Decimal</h1>
+  <div id="clock">00:00:00</div>
+  <div id="alarmMessage"></div>
+
+  <h2>Horario Diario</h2>
+  <div class="schedule">
+    <strong>Dormir:</strong> 00:00 – 03:00 decimal<br>
+    (00:00 – 07:12 tradicionales)
+  </div>
+  <div class="schedule">
+    <strong>Trabajo (Bloque 1):</strong> 03:00 – 04:00 decimal<br>
+    (07:12 – 09:36 tradicionales)
+  </div>
+  <div class="schedule">
+    <strong>Comida 1:</strong> 04:00 – 04:30 decimal<br>
+    (09:36 – 10:48 tradicionales)
+  </div>
+  <div class="schedule">
+    <strong>Trabajo (Bloque 2):</strong> 04:30 – 07:00 decimal<br>
+    (10:48 – 16:48 tradicionales)
+  </div>
+  <div class="schedule">
+    <strong>Comida 2:</strong> 07:00 – 07:30 decimal<br>
+    (16:48 – 18:00 tradicionales)
+  </div>
+  <div class="schedule">
+    <strong>Tiempo libre:</strong> 07:30 – 10:00 decimal<br>
+    (18:00 – 00:00 tradicionales)
+  </div>
+
+  <script>
+    // Alarmas definidas en formato "HH:MM" en tiempo decimal.
+    const alarms = ["04:00", "07:00"];
+    let lastAlarmTime = null; // Almacena el último minuto decimal en el que se activó una alarma
+
+    function updateDecimalClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      // Convertir la hora tradicional a tiempo decimal.
+      // Un día tradicional (24h) se mapea a 10 horas decimales.
+      const totalSecondsInDay = 24 * 60 * 60;
+      const currentSeconds = hours * 3600 + minutes * 60 + seconds;
+      const decimalDay = (currentSeconds / totalSecondsInDay) * 10;
+
+      const decimalHours = Math.floor(decimalDay);
+      const decimalMinutes = Math.floor((decimalDay - decimalHours) * 100);
+      const decimalSeconds = Math.floor(((decimalDay - decimalHours) * 100 - decimalMinutes) * 100);
+
+      const formattedTime = `${decimalHours.toString().padStart(2, '0')}:${decimalMinutes.toString().padStart(2, '0')}:${decimalSeconds.toString().padStart(2, '0')}`;
+      document.getElementById('clock').textContent = formattedTime;
+
+      // Verificar si se debe activar alguna alarma (comparando HH:MM)
+      const currentDecimalTime = `${decimalHours.toString().padStart(2, '0')}:${decimalMinutes.toString().padStart(2, '0')}`;
+
+      if (alarms.includes(currentDecimalTime)) {
+        if (lastAlarmTime !== currentDecimalTime) {
+          showAlarm(getActivity(decimalHours, decimalMinutes));
+          lastAlarmTime = currentDecimalTime;
+        }
+      } else {
+        lastAlarmTime = null;
+      }
+    }
+
+    // Función para mostrar el mensaje de alarma en el DOM
+    function showAlarm(activity) {
+      const alarmDiv = document.getElementById('alarmMessage');
+      alarmDiv.textContent = `¡Hora de ${activity}!`;
+      alarmDiv.style.display = 'block';
+      // Oculta el mensaje después de 5 segundos
+      setTimeout(() => {
+        alarmDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // Determinar la actividad para la alarma.
+    function getActivity(hour, minute) {
+      // Según el horario:
+      // - Alarma a las 04:00 → Comida 1.
+      // - Alarma a las 07:00 → Comida 2.
+      if (hour === 4 && minute === 0) return 'Comida 1';
+      if (hour === 7 && minute === 0) return 'Comida 2';
+      return 'actividad';
+    }
+
+    setInterval(updateDecimalClock, 1000);
+    updateDecimalClock();
+  </script>
+</body>
+</html>
