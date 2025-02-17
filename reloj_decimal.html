@@ -129,9 +129,9 @@
       // Según el horario:
       // - Alarma a las 04:00 → Comida 1.
       // - Alarma a las 07:00 → Comida 2.
-      if (hour === 4 && minute === 0) return 'Comida 1';
-      if (hour === 7 && minute === 0) return 'Comida 2';
-      return 'actividad';
+      if (hour === 4 && minute === 0) res.status ('Comida 1');
+      if (hour === 7 && minute === 0)  res.status ('Comida 2');
+      res.status ('actividad');
     }
 
     setInterval(updateDecimalClock, 1000);
